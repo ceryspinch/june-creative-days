@@ -1,0 +1,68 @@
+syntax = "proto3";
+ 
+package ticket_manager;
+ 
+option go_package="ticket_manager/";
+
+service TicketManager {
+    // Create
+    rpc BuyTicket(BuyTicketRequest) returns (BuyTicketResponse) {}
+    // Read
+    rpc ListTicket(ListTicketRequest) returns (ListTicketResponse) {}
+    // Read
+    rpc ListAllTickets(ListAllTicketsRequest) returns (ListAllTicketsResponse) {}
+    // Update
+    rpc UpdateTicketInformation(UpdateTicketInformationRequest) returns (UpdateTicketInformationResponse) {}
+    // Delete
+    rpc DeleteTicket(DeleteTicketRequest) returns (DeleteTicketResponse) {}
+}
+
+message Ticket {
+    // A unique identifier for the ticket.
+    string id = 1;
+    // The name of the person who has purchased the ticket.
+    string purchaser = 2;
+    // If the ticket is accompanied by a guest.
+    bool isBringingGuest = 3;
+    // If the ticket has been physically presented to the guest.
+    bool hasReceivedTicket = 4;
+}
+
+message BuyTicketRequest {
+    string purchaser = 1;
+    bool isBringingGuest = 2;
+}
+
+message BuyTicketResponse {
+    Ticket ticket = 1;
+}
+
+message ListTicketRequest {
+    string id = 1;
+}
+
+message ListTicketResponse {
+    Ticket ticket = 1;
+}
+
+message ListAllTicketsRequest {}
+
+message ListAllTicketsResponse {
+    repeated Ticket tickets = 1;
+}
+
+message UpdateTicketInformationRequest {
+    bool isBringingGuest = 1;
+    bool hasReceivedTicket = 2;
+}
+
+message UpdateTicketInformationResponse {
+    Ticket ticket = 1;
+}
+
+message DeleteTicketRequest {
+    string id = 1;
+}
+
+message DeleteTicketResponse {}
+
