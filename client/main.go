@@ -99,7 +99,7 @@ func main() {
 			})
 			return
 		}
-		res, err := client.UpdateTicketInformation(ctx, &pb.UpdateTicketInformationRequest{ID: ticket.ID, IsBringingGuest: ticket.IsBringingGuest, HasReceivedTicket: ticket.HasReceivedTicket})
+		res, err := client.UpdateTicketInformation(ctx, &pb.UpdateTicketInformationRequest{Id: ticket.ID, IsBringingGuest: ticket.IsBringingGuest, HasReceivedTicket: ticket.HasReceivedTicket})
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),

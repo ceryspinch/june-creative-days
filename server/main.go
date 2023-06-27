@@ -85,7 +85,7 @@ func (*server) BuyTicket(ctx context.Context, req *pb.BuyTicketRequest) (*pb.Buy
 
 	return &pb.BuyTicketResponse{
 		Ticket: &pb.Ticket{
-			ID:                newTicketID,
+			Id:                newTicketID,
 			Purchaser:         req.Purchaser,
 			IsBringingGuest:   req.IsBringingGuest,
 			HasReceivedTicket: false,
@@ -107,7 +107,7 @@ func (*server) ListTicket(ctx context.Context, req *pb.ListTicketRequest) (*pb.L
 
 	return &pb.ListTicketResponse{
 		Ticket: &pb.Ticket{
-			ID:                ticket.ID,
+			Id:                ticket.ID,
 			Purchaser:         ticket.Purchaser,
 			IsBringingGuest:   ticket.IsBringingGuest,
 			HasReceivedTicket: ticket.HasReceivedTicket,
@@ -143,7 +143,7 @@ func (*server) UpdateTicketInformation(ctx context.Context, req *pb.UpdateTicket
 
 	return &pb.UpdateTicketInformationResponse{
 		Ticket: &pb.Ticket{
-			ID:                ticket.ID,
+			Id:                ticket.ID,
 			Purchaser:         ticket.Purchaser,
 			IsBringingGuest:   ticket.IsBringingGuest,
 			HasReceivedTicket: ticket.HasReceivedTicket,
