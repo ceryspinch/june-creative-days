@@ -1,31 +1,34 @@
 package main
 
-import(
+import (
+	"flag"
+	"fmt"
+	"log"
 	"time"
-	
-	pb "git "
+
+	pb "ticket_service/proto"
 
 	"gorm.io/driver/postgres"
-    "gorm.io/gorm"
+	"gorm.io/gorm"
 )
 
 func init() {
 	DatabaseConnection()
- }
+}
 
- var DB *gorm.DB
- var err error
- 
- type Ticket struct{
-	ID					string `gorm:"primarykey"`
-	Purchaser		 	string
-	IsBringingGuest		bool
-	HasReceivedTicket	bool
-	CreatedAt			time.Time `gorm:"autoCreateTime:false"`
-	UpdatedAt 			time.Time `gorm:"autoUpdateTime:false"`
- }
+var DB *gorm.DB
+var err error
 
- func DatabaseConnection() {
+type Ticket struct {
+	ID                string `gorm:"primarykey"`
+	Purchaser         string
+	IsBringingGuest   bool
+	HasReceivedTicket bool
+	CreatedAt         time.Time `gorm:"autoCreateTime:false"`
+	UpdatedAt         time.Time `gorm:"autoUpdateTime:false"`
+}
+
+func DatabaseConnection() {
 	host := "localhost"
 	port := "5432"
 	dbName := "postgres"
@@ -39,17 +42,17 @@ func init() {
 		password,
 	)
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	DB.AutoMigrate(Movie{})
+	DB.AutoMigrate(Ticket{})
 	if err != nil {
 		log.Fatal("Error connecting to the database...", err)
 	}
 	fmt.Println("Database connection successful...")
- }
+}
 
- var (
+var (
 	port = flag.Int("port", 50051, "gRPC server port")
- )
-  
- type server struct {
-	pb.UnimplementedMovieServiceServer
- }
+)
+
+type server struct {
+	pb.UnimplementedTicketManagerServer
+}

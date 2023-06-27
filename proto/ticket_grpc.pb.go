@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v4.23.3
-// source: ticket_manager/ticket.proto
+// source: proto/ticket.proto
 
-package ticket_manager
+package proto
 
 import (
 	context "context"
@@ -44,7 +44,7 @@ func NewTicketManagerClient(cc grpc.ClientConnInterface) TicketManagerClient {
 
 func (c *ticketManagerClient) BuyTicket(ctx context.Context, in *BuyTicketRequest, opts ...grpc.CallOption) (*BuyTicketResponse, error) {
 	out := new(BuyTicketResponse)
-	err := c.cc.Invoke(ctx, "/ticket_manager.TicketManager/BuyTicket", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.TicketManager/BuyTicket", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (c *ticketManagerClient) BuyTicket(ctx context.Context, in *BuyTicketReques
 
 func (c *ticketManagerClient) ListTicket(ctx context.Context, in *ListTicketRequest, opts ...grpc.CallOption) (*ListTicketResponse, error) {
 	out := new(ListTicketResponse)
-	err := c.cc.Invoke(ctx, "/ticket_manager.TicketManager/ListTicket", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.TicketManager/ListTicket", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func (c *ticketManagerClient) ListTicket(ctx context.Context, in *ListTicketRequ
 
 func (c *ticketManagerClient) ListAllTickets(ctx context.Context, in *ListAllTicketsRequest, opts ...grpc.CallOption) (*ListAllTicketsResponse, error) {
 	out := new(ListAllTicketsResponse)
-	err := c.cc.Invoke(ctx, "/ticket_manager.TicketManager/ListAllTickets", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.TicketManager/ListAllTickets", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (c *ticketManagerClient) ListAllTickets(ctx context.Context, in *ListAllTic
 
 func (c *ticketManagerClient) UpdateTicketInformation(ctx context.Context, in *UpdateTicketInformationRequest, opts ...grpc.CallOption) (*UpdateTicketInformationResponse, error) {
 	out := new(UpdateTicketInformationResponse)
-	err := c.cc.Invoke(ctx, "/ticket_manager.TicketManager/UpdateTicketInformation", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.TicketManager/UpdateTicketInformation", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func (c *ticketManagerClient) UpdateTicketInformation(ctx context.Context, in *U
 
 func (c *ticketManagerClient) DeleteTicket(ctx context.Context, in *DeleteTicketRequest, opts ...grpc.CallOption) (*DeleteTicketResponse, error) {
 	out := new(DeleteTicketResponse)
-	err := c.cc.Invoke(ctx, "/ticket_manager.TicketManager/DeleteTicket", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.TicketManager/DeleteTicket", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +146,7 @@ func _TicketManager_BuyTicket_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ticket_manager.TicketManager/BuyTicket",
+		FullMethod: "/proto.TicketManager/BuyTicket",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TicketManagerServer).BuyTicket(ctx, req.(*BuyTicketRequest))
@@ -164,7 +164,7 @@ func _TicketManager_ListTicket_Handler(srv interface{}, ctx context.Context, dec
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ticket_manager.TicketManager/ListTicket",
+		FullMethod: "/proto.TicketManager/ListTicket",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TicketManagerServer).ListTicket(ctx, req.(*ListTicketRequest))
@@ -182,7 +182,7 @@ func _TicketManager_ListAllTickets_Handler(srv interface{}, ctx context.Context,
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ticket_manager.TicketManager/ListAllTickets",
+		FullMethod: "/proto.TicketManager/ListAllTickets",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TicketManagerServer).ListAllTickets(ctx, req.(*ListAllTicketsRequest))
@@ -200,7 +200,7 @@ func _TicketManager_UpdateTicketInformation_Handler(srv interface{}, ctx context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ticket_manager.TicketManager/UpdateTicketInformation",
+		FullMethod: "/proto.TicketManager/UpdateTicketInformation",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TicketManagerServer).UpdateTicketInformation(ctx, req.(*UpdateTicketInformationRequest))
@@ -218,7 +218,7 @@ func _TicketManager_DeleteTicket_Handler(srv interface{}, ctx context.Context, d
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ticket_manager.TicketManager/DeleteTicket",
+		FullMethod: "/proto.TicketManager/DeleteTicket",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TicketManagerServer).DeleteTicket(ctx, req.(*DeleteTicketRequest))
@@ -230,7 +230,7 @@ func _TicketManager_DeleteTicket_Handler(srv interface{}, ctx context.Context, d
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var TicketManager_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "ticket_manager.TicketManager",
+	ServiceName: "proto.TicketManager",
 	HandlerType: (*TicketManagerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -255,5 +255,5 @@ var TicketManager_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "ticket_manager/ticket.proto",
+	Metadata: "proto/ticket.proto",
 }
