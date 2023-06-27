@@ -52,8 +52,9 @@ message ListAllTicketsResponse {
 }
 
 message UpdateTicketInformationRequest {
-    bool isBringingGuest = 1;
-    bool hasReceivedTicket = 2;
+    string id = 1;
+    bool isBringingGuest = 2;
+    bool hasReceivedTicket = 3;
 }
 
 message UpdateTicketInformationResponse {
