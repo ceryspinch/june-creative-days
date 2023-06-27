@@ -6,11 +6,13 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"time"
 
 	pb "ticket_service/proto"
 
 	"github.com/google/uuid"
+	"google.golang.org/grpc"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -159,4 +161,24 @@ func (*server) DeleteTicket(ctx context.Context, req *pb.DeleteTicketRequest) (*
 	}
 
 	return &pb.DeleteTicketResponse{}, nil
+}
+
+func main() {
+	fmt.Println("gRPC server running ...")
+
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
+
+	if err != nil {
+		log.Fatalf("Failed to listen: %v", err)
+	}
+
+	s := grpc.NewServer()
+
+	pb.RegisterTicketManagerServer(s, &server{})
+
+	log.Printf("Server listening at %v", lis.Addr())
+
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve : %v", err)
+	}
 }
