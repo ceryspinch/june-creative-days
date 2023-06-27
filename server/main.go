@@ -38,7 +38,7 @@ func DatabaseConnection() {
 	port := "5432"
 	dbName := "postgres"
 	dbUser := "postgres"
-	password := "pass1234"
+	password := "temp"
 	dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable",
 		host,
 		port,
@@ -85,7 +85,7 @@ func (*server) BuyTicket(ctx context.Context, req *pb.BuyTicketRequest) (*pb.Buy
 
 	return &pb.BuyTicketResponse{
 		Ticket: &pb.Ticket{
-			Id:                newTicketID,
+			ID:                newTicketID,
 			Purchaser:         req.Purchaser,
 			IsBringingGuest:   req.IsBringingGuest,
 			HasReceivedTicket: false,
@@ -107,7 +107,7 @@ func (*server) ListTicket(ctx context.Context, req *pb.ListTicketRequest) (*pb.L
 
 	return &pb.ListTicketResponse{
 		Ticket: &pb.Ticket{
-			Id:                ticket.ID,
+			ID:                ticket.ID,
 			Purchaser:         ticket.Purchaser,
 			IsBringingGuest:   ticket.IsBringingGuest,
 			HasReceivedTicket: ticket.HasReceivedTicket,
@@ -143,7 +143,7 @@ func (*server) UpdateTicketInformation(ctx context.Context, req *pb.UpdateTicket
 
 	return &pb.UpdateTicketInformationResponse{
 		Ticket: &pb.Ticket{
-			Id:                ticket.ID,
+			ID:                ticket.ID,
 			Purchaser:         ticket.Purchaser,
 			IsBringingGuest:   ticket.IsBringingGuest,
 			HasReceivedTicket: ticket.HasReceivedTicket,
