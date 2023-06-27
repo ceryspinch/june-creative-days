@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"time"
 
+	"ticket_service/proto"
 	pb "ticket_service/proto"
 
 	"google.golang.org/grpc"
@@ -24,7 +26,7 @@ type Ticket struct {
 }
 
 func listTicket(ctx context.Context, client pb.TicketManagerClient, id string) {
-	log.Printf("Getting ticket information for ticket %d, id")
+	log.Printf("Getting ticket information for ticket %s", id)
 
 	tickets, err := client.ListTicket(ctx, &pb.ListTicketRequest{Id: id})
 	if err != nil {
@@ -33,18 +35,19 @@ func listTicket(ctx context.Context, client pb.TicketManagerClient, id string) {
 	log.Println(tickets)
 }
 
-func listAllTickets(ctx context.Context, client pb.TicketManagerClient) {
+func listAllTickets(ctx context.Context, client pb.TicketManagerClient) *proto.ListAllTicketsResponse {
 	log.Println("Getting all ticket information")
 
 	tickets, err := client.ListAllTickets(ctx, &pb.ListAllTicketsRequest{})
 	if err != nil {
 		log.Fatalf("client.ListAllTickets failed: %v", err)
 	}
-	log.Println(tickets)
+	//log.Println(tickets)
+	return tickets
 }
 
 func buyTicket(ctx context.Context, client pb.TicketManagerClient, purchaser string, isBringingGuest bool) {
-	log.Printf("Purchasing ticket for %s, purchaser")
+	log.Printf("Purchasing ticket for %s", purchaser)
 	ticket, err := client.BuyTicket(ctx, &pb.BuyTicketRequest{Purchaser: purchaser, IsBringingGuest: isBringingGuest})
 	if err != nil {
 		log.Fatalf("client.updateTicketInformation failed: %v", err)
@@ -53,7 +56,7 @@ func buyTicket(ctx context.Context, client pb.TicketManagerClient, purchaser str
 }
 
 func updateTicketInformation(ctx context.Context, client pb.TicketManagerClient, id string, isBringingGuest, hasReceivedTicket bool) {
-	log.Printf("Updating ticket information for ticket %d, id")
+	log.Printf("Updating ticket information for ticket %s", id)
 	ticket, err := client.UpdateTicketInformation(ctx, &pb.UpdateTicketInformationRequest{Id: id, IsBringingGuest: isBringingGuest, HasReceivedTicket: hasReceivedTicket})
 	if err != nil {
 		log.Fatalf("client.updateTicketInformation failed: %v", err)
@@ -62,7 +65,7 @@ func updateTicketInformation(ctx context.Context, client pb.TicketManagerClient,
 }
 
 func deleteTicket(ctx context.Context, client pb.TicketManagerClient, id string) {
-	log.Printf("Deleting ticket %d, id")
+	log.Printf("Deleting ticket %s", id)
 	client.DeleteTicket(ctx, &pb.DeleteTicketRequest{Id: id})
 }
 
@@ -84,11 +87,19 @@ func main() {
 	// Create client
 	client := pb.NewTicketManagerClient(conn)
 
+	fmt.Println()
 	buyTicket(ctx, client, "Cerys Pinch", false)
-	listTicket(ctx, client, "TODO")
-	updateTicketInformation(ctx, client, "TODO", false, true)
-	deleteTicket(ctx, client, "TODO")
-	listAllTickets(ctx, client)
+	fmt.Println()
+	ticketsList := listAllTickets(ctx, client)
+	cerysId := ticketsList.Tickets[0].Id
+	fmt.Println(ticketsList)
+	fmt.Println()
+	listTicket(ctx, client, cerysId)
+	fmt.Println()
+	updateTicketInformation(ctx, client, cerysId, false, true)
+	fmt.Println()
+	deleteTicket(ctx, client, cerysId)
+
 }
 
 // func main() {
