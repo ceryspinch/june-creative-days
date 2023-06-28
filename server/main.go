@@ -6,6 +6,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
 	"os"
@@ -44,6 +45,12 @@ func (s *ticketManagerServer) BuyTicket(ctx context.Context, req *pb.BuyTicketRe
 
 	// Update the map
 	s.purchasedTickets[newTicket.Id] = newTicket
+
+	// Update database
+	err := s.updateDatabase()
+	if err != nil {
+		return nil, err
+	}
 
 	return &pb.BuyTicketResponse{Ticket: newTicket}, nil
 }
@@ -97,6 +104,12 @@ func (s *ticketManagerServer) UpdateTicketInformation(ctx context.Context, req *
 	// Update the map with the updated ticket
 	s.purchasedTickets[req.Id] = updatedTicket
 
+	// Update database
+	err := s.updateDatabase()
+	if err != nil {
+		return nil, err
+	}
+
 	return &pb.UpdateTicketInformationResponse{
 		Ticket: updatedTicket,
 	}, nil
@@ -107,6 +120,12 @@ func (s *ticketManagerServer) UpdateTicketInformation(ctx context.Context, req *
 func (s *ticketManagerServer) DeleteTicket(ctx context.Context, req *pb.DeleteTicketRequest) (*pb.DeleteTicketResponse, error) {
 	// Find the ticket to delete
 	delete(s.purchasedTickets, req.Id)
+
+	// Update database
+	err := s.updateDatabase()
+	if err != nil {
+		return nil, err
+	}
 
 	return &pb.DeleteTicketResponse{}, nil
 }
@@ -129,6 +148,15 @@ func (s *ticketManagerServer) loadTickets(filePath string) error {
 	if err := json.Unmarshal(data, &s.purchasedTickets); err != nil {
 		return fmt.Errorf("failed to unmarshal tickets: %v", err)
 	}
+	return nil
+}
+
+func (s *ticketManagerServer) updateDatabase() error {
+	updatedDatabase, err := json.MarshalIndent(s.purchasedTickets, "", "    ")
+	if err != nil {
+		return err
+	}
+	ioutil.WriteFile(jsonDBFile, updatedDatabase, 0644)
 	return nil
 }
 

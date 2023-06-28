@@ -117,6 +117,17 @@ func main() {
 	}
 	fmt.Println(ticketsList)
 
+	err = updateTicketInformation(ctx, client, newTicket.Ticket.Id, true, true)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	ticket, err = listTicket(ctx, client, newTicket.Ticket.Id)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(ticket)
+
 	_, err = deleteTicket(ctx, client, newTicket.Ticket.Id)
 	if err != nil {
 		fmt.Println(err)
