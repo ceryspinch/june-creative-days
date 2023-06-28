@@ -24,25 +24,23 @@ type Ticket struct {
 	HasReceivedTicket bool   `json:"HasReceivedTicket"`
 }
 
-func buyTicket(ctx context.Context, client pb.TicketManagerClient, purchaser string, isBringingGuest bool) error {
+func buyTicket(ctx context.Context, client pb.TicketManagerClient, purchaser string, isBringingGuest bool) (*pb.BuyTicketResponse, error) {
 	log.Printf("Purchasing ticket for %s", purchaser)
 	ticket, err := client.BuyTicket(ctx, &pb.BuyTicketRequest{Purchaser: purchaser, IsBringingGuest: isBringingGuest})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	log.Println(ticket)
-	return nil
+	return ticket, nil
 }
 
-func listTicket(ctx context.Context, client pb.TicketManagerClient, id string) error {
+func listTicket(ctx context.Context, client pb.TicketManagerClient, id string) (*pb.ListTicketResponse, error) {
 	log.Printf("Getting ticket information for ticket %s", id)
 
-	tickets, err := client.ListTicket(ctx, &pb.ListTicketRequest{Id: id})
+	ticket, err := client.ListTicket(ctx, &pb.ListTicketRequest{Id: id})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	log.Println(tickets)
-	return nil
+	return ticket, nil
 }
 
 func listAllTickets(ctx context.Context, client pb.TicketManagerClient) (*pb.ListAllTicketsResponse, error) {
@@ -50,7 +48,7 @@ func listAllTickets(ctx context.Context, client pb.TicketManagerClient) (*pb.Lis
 
 	tickets, err := client.ListAllTickets(ctx, &pb.ListAllTicketsRequest{})
 	if err != nil {
-		//pb.ListAllTicketsResponse{}, err
+		return nil, err
 	}
 	//log.Println(tickets)
 	return tickets, nil
@@ -66,13 +64,13 @@ func updateTicketInformation(ctx context.Context, client pb.TicketManagerClient,
 	return nil
 }
 
-func deleteTicket(ctx context.Context, client pb.TicketManagerClient, id string) error {
+func deleteTicket(ctx context.Context, client pb.TicketManagerClient, id string) (*pb.DeleteTicketResponse, error) {
 	log.Printf("Deleting ticket %s", id)
 	_, err := client.DeleteTicket(ctx, &pb.DeleteTicketRequest{Id: id})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return nil, nil
 }
 
 func main() {
@@ -94,17 +92,21 @@ func main() {
 	// Create client
 	client := pb.NewTicketManagerClient(conn)
 
-	fmt.Println()
-	buyTicket(ctx, client, "Cerys Pinch", false)
-	fmt.Println()
 	ticketsList, _ := listAllTickets(ctx, client)
-	cerysId := ticketsList.Tickets[0].Id
 	fmt.Println(ticketsList)
-	fmt.Println()
-	listTicket(ctx, client, cerysId)
-	fmt.Println()
-	updateTicketInformation(ctx, client, cerysId, false, true)
-	fmt.Println()
-	deleteTicket(ctx, client, cerysId)
+	ticket, _ := listTicket(ctx, client, "124")
+	fmt.Println(ticket)
+	newTicket, _ := buyTicket(ctx, client, "Mark", false)
+	ticketsList, err = listAllTickets(ctx, client)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(ticketsList)
+	_, _ = deleteTicket(ctx, client, newTicket.Ticket.Id)
+	ticketsList, err = listAllTickets(ctx, client)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(ticketsList)
 
 }
