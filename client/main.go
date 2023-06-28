@@ -7,7 +7,6 @@ import (
 	"log"
 	"time"
 
-	"ticket_service/proto"
 	pb "ticket_service/proto"
 
 	"google.golang.org/grpc"
@@ -25,53 +24,61 @@ type Ticket struct {
 	HasReceivedTicket bool   `json:"HasReceivedTicket"`
 }
 
-func listTicket(ctx context.Context, client pb.TicketManagerClient, id string) {
+func buyTicket(ctx context.Context, client pb.TicketManagerClient, purchaser string, isBringingGuest bool) error {
+	log.Printf("Purchasing ticket for %s", purchaser)
+	ticket, err := client.BuyTicket(ctx, &pb.BuyTicketRequest{Purchaser: purchaser, IsBringingGuest: isBringingGuest})
+	if err != nil {
+		return err
+	}
+	log.Println(ticket)
+	return nil
+}
+
+func listTicket(ctx context.Context, client pb.TicketManagerClient, id string) error {
 	log.Printf("Getting ticket information for ticket %s", id)
 
 	tickets, err := client.ListTicket(ctx, &pb.ListTicketRequest{Id: id})
 	if err != nil {
-		log.Fatalf("client.ListTicket failed: %v", err)
+		return err
 	}
 	log.Println(tickets)
+	return nil
 }
 
-func listAllTickets(ctx context.Context, client pb.TicketManagerClient) *proto.ListAllTicketsResponse {
+func listAllTickets(ctx context.Context, client pb.TicketManagerClient) (*pb.ListAllTicketsResponse, error) {
 	log.Println("Getting all ticket information")
 
 	tickets, err := client.ListAllTickets(ctx, &pb.ListAllTicketsRequest{})
 	if err != nil {
-		log.Fatalf("client.ListAllTickets failed: %v", err)
+		//pb.ListAllTicketsResponse{}, err
 	}
 	//log.Println(tickets)
-	return tickets
+	return tickets, nil
 }
 
-func buyTicket(ctx context.Context, client pb.TicketManagerClient, purchaser string, isBringingGuest bool) {
-	log.Printf("Purchasing ticket for %s", purchaser)
-	ticket, err := client.BuyTicket(ctx, &pb.BuyTicketRequest{Purchaser: purchaser, IsBringingGuest: isBringingGuest})
-	if err != nil {
-		log.Fatalf("client.updateTicketInformation failed: %v", err)
-	}
-	log.Println(ticket)
-}
-
-func updateTicketInformation(ctx context.Context, client pb.TicketManagerClient, id string, isBringingGuest, hasReceivedTicket bool) {
+func updateTicketInformation(ctx context.Context, client pb.TicketManagerClient, id string, isBringingGuest, hasReceivedTicket bool) error {
 	log.Printf("Updating ticket information for ticket %s", id)
 	ticket, err := client.UpdateTicketInformation(ctx, &pb.UpdateTicketInformationRequest{Id: id, IsBringingGuest: isBringingGuest, HasReceivedTicket: hasReceivedTicket})
 	if err != nil {
-		log.Fatalf("client.updateTicketInformation failed: %v", err)
+		return err
 	}
 	log.Println(ticket)
+	return nil
 }
 
-func deleteTicket(ctx context.Context, client pb.TicketManagerClient, id string) {
+func deleteTicket(ctx context.Context, client pb.TicketManagerClient, id string) error {
 	log.Printf("Deleting ticket %s", id)
-	client.DeleteTicket(ctx, &pb.DeleteTicketRequest{Id: id})
+	_, err := client.DeleteTicket(ctx, &pb.DeleteTicketRequest{Id: id})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func main() {
 	flag.Parse()
 	var opts []grpc.DialOption
+
 	// Use insecure credentials for now as only running on bench
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
@@ -90,7 +97,7 @@ func main() {
 	fmt.Println()
 	buyTicket(ctx, client, "Cerys Pinch", false)
 	fmt.Println()
-	ticketsList := listAllTickets(ctx, client)
+	ticketsList, _ := listAllTickets(ctx, client)
 	cerysId := ticketsList.Tickets[0].Id
 	fmt.Println(ticketsList)
 	fmt.Println()
@@ -101,108 +108,3 @@ func main() {
 	deleteTicket(ctx, client, cerysId)
 
 }
-
-// func main() {
-// 	flag.Parse()
-// 	conn, err := grpc.Dial(*addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-
-// 	if err != nil {
-// 		log.Fatalf("did not connect: %v", err)
-// 	}
-
-// 	defer conn.Close()
-// 	client := pb.NewTicketManagerClient(conn)
-
-// 	//generic request
-// 	r := gin.Default()
-
-// 	//request for all tickets
-// 	r.GET("/tickets", func(ctx *gin.Context) {
-// 		res, err := client.ListAllTickets(ctx, &pb.ListAllTicketsRequest{})
-// 		if err != nil {
-// 			ctx.JSON(http.StatusBadRequest, gin.H{
-// 				"error": err,
-// 			})
-// 			return
-// 		}
-// 		ctx.JSON(http.StatusOK, gin.H{
-// 			"tickets": res.Tickets,
-// 		})
-// 	})
-
-// 	//request for singular ticket
-// 	r.GET("/tickets/:id", func(ctx *gin.Context) {
-// 		id := ctx.Param("id")
-// 		res, err := client.ListTicket(ctx, &pb.ListTicketRequest{Id: id})
-// 		if err != nil {
-// 			ctx.JSON(http.StatusNotFound, gin.H{
-// 				"message": err.Error(),
-// 			})
-// 			return
-// 		}
-// 		ctx.JSON(http.StatusOK, gin.H{
-// 			"ticket": res.Ticket,
-// 		})
-// 	})
-
-// 	//buy ticket
-// 	r.POST("/tickets", func(ctx *gin.Context) {
-// 		var ticket Ticket
-
-// 		err := ctx.ShouldBind(&ticket)
-// 		if err != nil {
-// 			ctx.JSON(http.StatusBadRequest, gin.H{
-// 				"error": err,
-// 			})
-// 			return
-// 		}
-// 		res, err := client.BuyTicket(ctx, &pb.BuyTicketRequest{Purchaser: ticket.Purchaser, IsBringingGuest: ticket.IsBringingGuest})
-// 		if err != nil {
-// 			ctx.JSON(http.StatusBadRequest, gin.H{
-// 				"error": err,
-// 			})
-// 			return
-// 		}
-// 		ctx.JSON(http.StatusCreated, gin.H{
-// 			"Ticket": res.Ticket,
-// 		})
-// 	})
-
-// 	//update ticket information
-// 	r.PUT("/tickets/:id", func(ctx *gin.Context) {
-// 		var ticket Ticket
-// 		err := ctx.ShouldBind(&ticket)
-// 		if err != nil {
-// 			ctx.JSON(http.StatusBadRequest, gin.H{
-// 				"error": err.Error(),
-// 			})
-// 			return
-// 		}
-// 		res, err := client.UpdateTicketInformation(ctx, &pb.UpdateTicketInformationRequest{Id: ticket.ID, IsBringingGuest: ticket.IsBringingGuest, HasReceivedTicket: ticket.HasReceivedTicket})
-// 		if err != nil {
-// 			ctx.JSON(http.StatusBadRequest, gin.H{
-// 				"error": err.Error(),
-// 			})
-// 			return
-// 		}
-// 		ctx.JSON(http.StatusOK, gin.H{
-// 			"ticket": res.Ticket,
-// 		})
-// 		return
-// 	})
-
-// 	//delete ticket
-// 	r.DELETE("/ticket/:id", func(ctx *gin.Context) {
-// 		id := ctx.Param("id")
-// 		_, err := client.DeleteTicket(ctx, &pb.DeleteTicketRequest{Id: id})
-// 		if err != nil {
-// 			ctx.JSON(http.StatusBadRequest, gin.H{
-// 				"error": err.Error(),
-// 			})
-// 			return
-// 		}
-// 		ctx.JSON(http.StatusOK, gin.H{"message": "Ticket deleted successfully"})
-
-// 	})
-// 	r.Run(":5000")
-// }
