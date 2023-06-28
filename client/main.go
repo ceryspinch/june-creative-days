@@ -26,6 +26,7 @@ type Ticket struct {
 
 func buyTicket(ctx context.Context, client pb.TicketManagerClient, purchaser string, isBringingGuest bool) (*pb.BuyTicketResponse, error) {
 	log.Printf("Purchasing ticket for %s", purchaser)
+
 	ticket, err := client.BuyTicket(ctx, &pb.BuyTicketRequest{Purchaser: purchaser, IsBringingGuest: isBringingGuest})
 	if err != nil {
 		return nil, err
@@ -50,17 +51,17 @@ func listAllTickets(ctx context.Context, client pb.TicketManagerClient) (*pb.Lis
 	if err != nil {
 		return nil, err
 	}
-	//log.Println(tickets)
+
 	return tickets, nil
 }
 
 func updateTicketInformation(ctx context.Context, client pb.TicketManagerClient, id string, isBringingGuest, hasReceivedTicket bool) error {
 	log.Printf("Updating ticket information for ticket %s", id)
-	ticket, err := client.UpdateTicketInformation(ctx, &pb.UpdateTicketInformationRequest{Id: id, IsBringingGuest: isBringingGuest, HasReceivedTicket: hasReceivedTicket})
+	_, err := client.UpdateTicketInformation(ctx, &pb.UpdateTicketInformationRequest{Id: id, IsBringingGuest: isBringingGuest, HasReceivedTicket: hasReceivedTicket})
 	if err != nil {
 		return err
 	}
-	log.Println(ticket)
+
 	return nil
 }
 
@@ -92,21 +93,38 @@ func main() {
 	// Create client
 	client := pb.NewTicketManagerClient(conn)
 
-	ticketsList, _ := listAllTickets(ctx, client)
-	fmt.Println(ticketsList)
-	ticket, _ := listTicket(ctx, client, "124")
-	fmt.Println(ticket)
-	newTicket, _ := buyTicket(ctx, client, "Mark", false)
-	ticketsList, err = listAllTickets(ctx, client)
+	// Testing purposes
+	ticketsList, err := listAllTickets(ctx, client)
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println(ticketsList)
-	_, _ = deleteTicket(ctx, client, newTicket.Ticket.Id)
+
+	ticket, err := listTicket(ctx, client, "124")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(ticket)
+
+	newTicket, err := buyTicket(ctx, client, "Mark", false)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	ticketsList, err = listAllTickets(ctx, client)
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println(ticketsList)
 
+	_, err = deleteTicket(ctx, client, newTicket.Ticket.Id)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	ticketsList, err = listAllTickets(ctx, client)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(ticketsList)
 }
