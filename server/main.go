@@ -15,6 +15,7 @@ import (
 
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 var (
@@ -168,6 +169,7 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
+	reflection.Register(grpcServer)
 
 	pb.RegisterTicketManagerServer(grpcServer, newTicketManagerServer())
 
