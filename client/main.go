@@ -25,7 +25,7 @@ type Ticket struct {
 }
 
 func buyTicket(ctx context.Context, client pb.TicketManagerClient, purchaser string, isBringingGuest bool) (*pb.BuyTicketResponse, error) {
-	log.Printf("Purchasing ticket for %s", purchaser)
+	//log.Printf("Purchasing ticket for %s", purchaser)
 
 	ticket, err := client.BuyTicket(ctx, &pb.BuyTicketRequest{Purchaser: purchaser, IsBringingGuest: isBringingGuest})
 	if err != nil {
@@ -35,7 +35,7 @@ func buyTicket(ctx context.Context, client pb.TicketManagerClient, purchaser str
 }
 
 func listTicket(ctx context.Context, client pb.TicketManagerClient, id string) (*pb.ListTicketResponse, error) {
-	log.Printf("Getting ticket information for ticket %s", id)
+	//log.Printf("Getting ticket information for ticket %s", id)
 
 	ticket, err := client.ListTicket(ctx, &pb.ListTicketRequest{Id: id})
 	if err != nil {
@@ -45,7 +45,7 @@ func listTicket(ctx context.Context, client pb.TicketManagerClient, id string) (
 }
 
 func listAllTickets(ctx context.Context, client pb.TicketManagerClient) (*pb.ListAllTicketsResponse, error) {
-	log.Println("Getting all ticket information")
+	//log.Println("Getting all ticket information")
 
 	tickets, err := client.ListAllTickets(ctx, &pb.ListAllTicketsRequest{})
 	if err != nil {
@@ -56,7 +56,7 @@ func listAllTickets(ctx context.Context, client pb.TicketManagerClient) (*pb.Lis
 }
 
 func updateTicketInformation(ctx context.Context, client pb.TicketManagerClient, id string, isBringingGuest, hasReceivedTicket bool) (*pb.UpdateTicketInformationResponse, error) {
-	log.Printf("Updating ticket information for ticket %s", id)
+	//log.Printf("Updating ticket information for ticket %s", id)
 	updatedTicket, err := client.UpdateTicketInformation(ctx, &pb.UpdateTicketInformationRequest{Id: id, IsBringingGuest: isBringingGuest, HasReceivedTicket: hasReceivedTicket})
 	if err != nil {
 		return nil, err
@@ -65,12 +65,28 @@ func updateTicketInformation(ctx context.Context, client pb.TicketManagerClient,
 }
 
 func deleteTicket(ctx context.Context, client pb.TicketManagerClient, id string) (*pb.DeleteTicketResponse, error) {
-	log.Printf("Deleting ticket %s", id)
+	//log.Printf("Deleting ticket %s", id)
 	resp, err := client.DeleteTicket(ctx, &pb.DeleteTicketRequest{Id: id})
 	if err != nil {
 		return nil, err
 	}
 	return resp, nil
+}
+
+func formatting(ticket *pb.Ticket) {
+	fmt.Println("Printing ticket info")
+	fmt.Println("Name: ", ticket.Purchaser)
+	fmt.Println("Id: ", ticket.Id)
+	if ticket.IsBringingGuest {
+		fmt.Println("Plus one? Yes")
+	}
+	if ticket.HasReceivedTicket {
+		fmt.Println("Has received ticket? Yes")
+	} else {
+		fmt.Println("Has received ticket? No")
+	}
+	fmt.Println()
+
 }
 
 func testing(ctx context.Context, client pb.TicketManagerClient) {
@@ -79,47 +95,52 @@ func testing(ctx context.Context, client pb.TicketManagerClient) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(ticketsList)
-
-	ticket, err := listTicket(ctx, client, "124")
-	if err != nil {
-		fmt.Println(err)
+	for _, ticket := range ticketsList.Tickets {
+		formatting(ticket)
 	}
-	fmt.Println(ticket)
+	//fmt.Println(ticketsList)
 
-	newTicket, err := buyTicket(ctx, client, "Mark", false)
-	if err != nil {
-		fmt.Println(err)
-	}
+	// ticket, err := listTicket(ctx, client, "124")
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// formatting(ticket.Ticket)
+	// // fmt.Println(ticket)
 
-	ticketsList, err = listAllTickets(ctx, client)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(ticketsList)
+	// newTicket, err := buyTicket(ctx, client, "Mark", false)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
 
-	updatedTicket, err := updateTicketInformation(ctx, client, newTicket.Ticket.Id, true, true)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(updatedTicket)
+	// ticketsList, err = listAllTickets(ctx, client)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// // fmt.Println(ticketsList)
 
-	ticket, err = listTicket(ctx, client, newTicket.Ticket.Id)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(ticket)
+	// updatedTicket, err := updateTicketInformation(ctx, client, newTicket.Ticket.Id, true, true)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// //formatting(updatedTicket.Ticket)
+	// // fmt.Println(updatedTicket)
 
-	_, err = deleteTicket(ctx, client, newTicket.Ticket.Id)
-	if err != nil {
-		fmt.Println(err)
-	}
+	// ticket, err = listTicket(ctx, client, newTicket.Ticket.Id)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// // fmt.Println(ticket)
 
-	ticketsList, err = listAllTickets(ctx, client)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(ticketsList)
+	// _, err = deleteTicket(ctx, client, newTicket.Ticket.Id)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+
+	// ticketsList, err = listAllTickets(ctx, client)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// // fmt.Println(ticketsList)
 }
 
 func menu(ctx context.Context, client pb.TicketManagerClient) {
@@ -129,15 +150,16 @@ func menu(ctx context.Context, client pb.TicketManagerClient) {
 
 	fmt.Println("            MENU")
 	fmt.Println("Enter for the following options")
-	fmt.Println("1. To View all tickets")
+	fmt.Println("1. To view all tickets")
 	fmt.Println("2. To buy a tickets")
-	fmt.Println("3. To View a specific ticket")
+	fmt.Println("3. To view a specific ticket")
 	fmt.Println("4. To update a ticket")
 	fmt.Println("5. To delete a ticket")
 	fmt.Println("6. To quit")
-	fmt.Println("Enter your choice:")
+	fmt.Print("Enter your choice: ")
 	var option int
 	fmt.Scanln(&option)
+	fmt.Println()
 
 	for option != 6 {
 		switch option {
@@ -146,56 +168,60 @@ func menu(ctx context.Context, client pb.TicketManagerClient) {
 			if err != nil {
 				fmt.Println(err)
 			}
-			fmt.Println(ticketsList)
+			for _, ticket := range ticketsList.Tickets {
+				formatting(ticket)
+			}
 		case 2:
 			var name string
 			var isBringingGuest bool
-			fmt.Println("Enter the name of the purchaser:")
+			fmt.Print("Enter the name of the purchaser: ")
 			fmt.Scanln(&name)
-			fmt.Println("Is the purchaser bringing a +1? Enter true or false:")
+			fmt.Print("Is the purchaser bringing a +1? Enter true or false: ")
 			fmt.Scanln(&isBringingGuest)
 			newTicket, err := buyTicket(ctx, client, name, isBringingGuest)
 			if err != nil {
 				fmt.Println(err)
 			}
-			fmt.Println(newTicket)
+			formatting(newTicket.Ticket)
 		case 3:
 			var id string
-			fmt.Println("Enter the id of the ticket to list:")
+			fmt.Print("Enter the id of the ticket to list: ")
 			fmt.Scanln(&id)
 			ticket, err := listTicket(ctx, client, id)
 			if err != nil {
 				fmt.Println(err)
 			}
-			fmt.Println(ticket)
+			formatting(ticket.Ticket)
 		case 4:
 			var id string
 			var isBringingGuest bool
 			var hasReceivedTicket bool
-			fmt.Println("Enter the id of the ticket to update:")
+			fmt.Print("Enter the id of the ticket to update: ")
 			fmt.Scanln(&id)
-			fmt.Println("Is the purchaser bringing a +1? Enter true or false:")
+			fmt.Print("Is the purchaser bringing a +1? Enter true or false: ")
 			fmt.Scanln(&isBringingGuest)
-			fmt.Println("Has the purchaser recieved a ticket? Enter the id of the ticket to update:")
+			fmt.Print("Has the purchaser recieved a ticket? Enter the id of the ticket to update: ")
 			fmt.Scanln(&hasReceivedTicket)
 			updatedTicket, err := updateTicketInformation(ctx, client, id, isBringingGuest, hasReceivedTicket)
 			if err != nil {
 				fmt.Println(err)
 			}
-			fmt.Println(updatedTicket)
+			formatting(updatedTicket.Ticket)
 		case 5:
 			var id string
-			fmt.Println("Enter the id of the ticket to delete:")
+			fmt.Print("Enter the id of the ticket to delete: ")
 			fmt.Scanln(&id)
 			_, err := deleteTicket(ctx, client, id)
 			if err != nil {
 				fmt.Println(err)
 			}
+			fmt.Println("Ticket deleted")
 		default:
 			fmt.Println("That was not a valid option")
 		}
-		fmt.Println("Enter your choice:")
+		fmt.Print("Enter your choice: ")
 		fmt.Scanln(&option)
+		fmt.Println()
 	}
 }
 
