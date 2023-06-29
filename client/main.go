@@ -55,44 +55,25 @@ func listAllTickets(ctx context.Context, client pb.TicketManagerClient) (*pb.Lis
 	return tickets, nil
 }
 
-func updateTicketInformation(ctx context.Context, client pb.TicketManagerClient, id string, isBringingGuest, hasReceivedTicket bool) error {
+func updateTicketInformation(ctx context.Context, client pb.TicketManagerClient, id string, isBringingGuest, hasReceivedTicket bool) (*pb.UpdateTicketInformationResponse, error) {
 	log.Printf("Updating ticket information for ticket %s", id)
-	_, err := client.UpdateTicketInformation(ctx, &pb.UpdateTicketInformationRequest{Id: id, IsBringingGuest: isBringingGuest, HasReceivedTicket: hasReceivedTicket})
+	updatedTicket, err := client.UpdateTicketInformation(ctx, &pb.UpdateTicketInformationRequest{Id: id, IsBringingGuest: isBringingGuest, HasReceivedTicket: hasReceivedTicket})
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	return nil
+	return updatedTicket, nil
 }
 
 func deleteTicket(ctx context.Context, client pb.TicketManagerClient, id string) (*pb.DeleteTicketResponse, error) {
 	log.Printf("Deleting ticket %s", id)
-	_, err := client.DeleteTicket(ctx, &pb.DeleteTicketRequest{Id: id})
+	resp, err := client.DeleteTicket(ctx, &pb.DeleteTicketRequest{Id: id})
 	if err != nil {
 		return nil, err
 	}
-	return nil, nil
+	return resp, nil
 }
 
-func main() {
-	flag.Parse()
-	var opts []grpc.DialOption
-
-	// Use insecure credentials for now as only running on bench
-	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
-
-	conn, err := grpc.Dial(*serverAddr, opts...)
-	if err != nil {
-		log.Fatalf("fail to dial: %v", err)
-	}
-	defer conn.Close()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	// Create client
-	client := pb.NewTicketManagerClient(conn)
-
+func testing(ctx context.Context, client pb.TicketManagerClient) {
 	// Testing purposes
 	ticketsList, err := listAllTickets(ctx, client)
 	if err != nil {
@@ -117,10 +98,11 @@ func main() {
 	}
 	fmt.Println(ticketsList)
 
-	err = updateTicketInformation(ctx, client, newTicket.Ticket.Id, true, true)
+	updatedTicket, err := updateTicketInformation(ctx, client, newTicket.Ticket.Id, true, true)
 	if err != nil {
 		fmt.Println(err)
 	}
+	fmt.Println(updatedTicket)
 
 	ticket, err = listTicket(ctx, client, newTicket.Ticket.Id)
 	if err != nil {
@@ -138,4 +120,105 @@ func main() {
 		fmt.Println(err)
 	}
 	fmt.Println(ticketsList)
+}
+
+func menu(ctx context.Context, client pb.TicketManagerClient) {
+	fmt.Println("****************************")
+	fmt.Println("      Ticketing Client")
+	fmt.Println("****************************\n\n")
+
+	fmt.Println("            MENU")
+	fmt.Println("Enter for the following options")
+	fmt.Println("1. To View all tickets")
+	fmt.Println("2. To buy a tickets")
+	fmt.Println("3. To View a specific ticket")
+	fmt.Println("4. To update a ticket")
+	fmt.Println("5. To delete a ticket")
+	fmt.Println("6. To quit")
+	fmt.Println("Enter your choice:")
+	var option int
+	fmt.Scanln(&option)
+
+	for option != 6 {
+		switch option {
+		case 1:
+			ticketsList, err := listAllTickets(ctx, client)
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println(ticketsList)
+		case 2:
+			var name string
+			var isBringingGuest bool
+			fmt.Println("Enter the name of the purchaser:")
+			fmt.Scanln(&name)
+			fmt.Println("Is the purchaser bringing a +1? Enter true or false:")
+			fmt.Scanln(&isBringingGuest)
+			newTicket, err := buyTicket(ctx, client, name, isBringingGuest)
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println(newTicket)
+		case 3:
+			var id string
+			fmt.Println("Enter the id of the ticket to list:")
+			fmt.Scanln(&id)
+			ticket, err := listTicket(ctx, client, id)
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println(ticket)
+		case 4:
+			var id string
+			var isBringingGuest bool
+			var hasReceivedTicket bool
+			fmt.Println("Enter the id of the ticket to update:")
+			fmt.Scanln(&id)
+			fmt.Println("Is the purchaser bringing a +1? Enter true or false:")
+			fmt.Scanln(&isBringingGuest)
+			fmt.Println("Has the purchaser recieved a ticket? Enter the id of the ticket to update:")
+			fmt.Scanln(&hasReceivedTicket)
+			updatedTicket, err := updateTicketInformation(ctx, client, id, isBringingGuest, hasReceivedTicket)
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println(updatedTicket)
+		case 5:
+			var id string
+			fmt.Println("Enter the id of the ticket to delete:")
+			fmt.Scanln(&id)
+			_, err := deleteTicket(ctx, client, id)
+			if err != nil {
+				fmt.Println(err)
+			}
+		default:
+			fmt.Println("That was not a valid option")
+		}
+		fmt.Println("Enter your choice:")
+		fmt.Scanln(&option)
+	}
+}
+
+func main() {
+	flag.Parse()
+	var opts []grpc.DialOption
+
+	// Use insecure credentials for now as only running on bench
+	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	conn, err := grpc.Dial(*serverAddr, opts...)
+	if err != nil {
+		log.Fatalf("fail to dial: %v", err)
+	}
+	defer conn.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+	defer cancel()
+
+	// Create client
+	client := pb.NewTicketManagerClient(conn)
+
+	menu(ctx, client)
+	//testing(ctx, client)
+
 }

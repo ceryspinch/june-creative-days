@@ -1,20 +1,21 @@
 {
-  "123": {
-    "id": "123",
-    "purchaser": "Cerys Pinch",
-    "isBringingGuest": "true",
-    "hasRecievedTicket": "false"
-  },
-  "124": {
-    "id": "124",
-    "purchaser": "Nikita Sohna",
-    "isBringingGuest": "false",
-    "hasRecievedTicket": "false"
-  },
-  "125": {
-    "id": "125",
-    "purchaser": "Zac Turner",
-    "isBringingGuest": "true",
-    "hasRecievedTicket": "true"
-  }
+    "123": {
+        "id": "123",
+        "purchaser": "Cerys Pinch",
+        "isBringingGuest": true
+    },
+    "124": {
+        "id": "124",
+        "purchaser": "Nikita Sohna"
+    },
+    "125": {
+        "id": "125",
+        "purchaser": "Zac Turner",
+        "isBringingGuest": true
+    },
+    "933a5d24-b36f-4be1-bbc6-4534c8b99162": {
+        "id": "933a5d24-b36f-4be1-bbc6-4534c8b99162",
+        "purchaser": "cam",
+        "isBringingGuest": true
+    }
 }
